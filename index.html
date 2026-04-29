@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AudioTwin — Audio Correspondence</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='4' fill='none' stroke='%231d1d1f' stroke-width='1.5'/%3E%3Cpath d='M7 16C7 16 9.5 10 12 16C14.5 22 17 16 17 16C17 16 19.5 10 22 16C24.5 22 27 16 27 16' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7 19C7 19 9.5 13 12 19C14.5 25 17 19 17 19C17 19 19.5 13 22 19C24.5 25 27 19 27 19' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.35'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:           #f2f1ec;
+      --surface:      #ffffff;
+      --surface-warm: #faf9f6;
+      --border:       #e0dfd9;
+      --border-strong:#c8c7c1;
+      --text:         #1d1d1f;
+      --text-secondary:#6e6e73;
+      --text-tertiary:#a1a1a6;
+      --accent:       #1d1d1f;
+      --accent-hover: #000000;
+      --blue:         #0056b3;
+      --green:        #2d6a4f;
+      --amber:        #9c6644;
+      --red:          #9b2335;
+      --shadow:       0 1px 2px rgba(0,0,0,0.04), 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-raised:0 2px 4px rgba(0,0,0,0.05), 0 8px 24px rgba(0,0,0,0.06);
+      --radius:       3px;
+      --radius-lg:    6px;
+      --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono:    'IBM Plex Mono', monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 20px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      color: var(--text);
+      flex-shrink: 0;
+    }
+
+    .logo-text h1 {
+      font-family: var(--font-sans);
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .logo-text span {
+      display: block;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+      margin-top: 1px;
+    }
+
+    .header-meta {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.02em;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 48px 32px 96px;
+    }
+
+    /* ── INTRO ── */
+    .intro {
+      margin-bottom: 40px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 32px;
+    }
+
+    .intro h2 {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .intro p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    .privacy-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--green);
+      border: 1px solid rgba(45,106,79,0.25);
+      padding: 6px 12px;
+      border-radius: var(--radius);
+      white-space: nowrap;
+      flex-shrink: 0;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── SOURCES ── */
+    .sources {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr;
+      gap: 0;
+      align-items: start;
+    }
+
+    .source-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s ease;
+    }
+
+    .source-panel.has-file {
+      border-color: var(--border-strong);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .panel-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+    }
+
+    .panel-status {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.04em;
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      position: relative;
+      border: 1.5px dashed var(--border-strong);
+      border-radius: var(--radius);
+      padding: 28px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      min-height: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--surface-warm);
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--text-secondary);
+      background: #f7f7f5;
+    }
+
+    .drop-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      color: var(--text-tertiary);
+      opacity: 0.6;
+      flex-shrink: 0;
+    }
+
+    .drop-text strong {
+      display: block;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .drop-text {
+      color: var(--text-tertiary);
+      font-size: 12px;
+    }
+
+    /* URL section */
+    .url-section { margin-top: 12px; }
+
+    .url-toggle {
+      background: none;
+      border: none;
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      padding: 4px 0;
+      transition: color 0.15s;
+    }
+    .url-toggle:hover { color: var(--text); }
+
+    .url-row {
+      display: none;
+      margin-top: 10px;
+      gap: 8px;
+    }
+    .url-row.open { display: flex; }
+
+    .url-input {
+      flex: 1;
+      background: var(--surface-warm);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: var(--radius);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .url-input:focus { border-color: var(--text-secondary); }
+    .url-input::placeholder { color: var(--text-tertiary); }
+
+    .url-load {
+      background: var(--text);
+      border: none;
+      color: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .url-load:hover { background: var(--accent-hover); }
+
+    .cors-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--amber);
+      display: none;
+      line-height: 1.5;
+    }
+    .cors-note.visible { display: block; }
+
+    /* File info */
+    .file-info {
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: var(--surface-warm);
+      border-left: 2px solid var(--text);
+      border-radius: 0 var(--radius) var(--radius) 0;
+      display: none;
+    }
+    .file-info.visible { display: block; }
+
+    .fi-name {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      word-break: break-all;
+    }
+
+    .fi-meta {
+      color: var(--text-tertiary);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      margin-top: 3px;
+    }
+
+    /* Waveform */
+    .waveform-wrap {
+      margin-top: 16px;
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    canvas.waveform {
+      display: block;
+      width: 100%;
+      height: 72px;
+      background: var(--surface-warm);
+    }
+
+    .wave-label {
+      position: absolute;
+      top: 5px;
+      left: 8px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--text-tertiary);
+      letter-spacing: 0.1em;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+
+    /* ── VS column ── */
+    .vs-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding-top: 64px;
+      gap: 6px;
+    }
+
+    .vs-line {
+      width: 1px;
+      flex: 1;
+      max-height: 28px;
+      background: var(--border-strong);
+    }
+
+    .vs-text {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+    }
+
+    /* ── CONTROLS ── */
+    .controls {
+      margin-top: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .analyze-btn {
+      position: relative;
+      background: var(--accent);
+      border: none;
+      color: var(--surface);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      padding: 14px 48px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .analyze-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08), 0 8px 20px rgba(0,0,0,0.1);
+    }
+
+    .analyze-btn:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+    }
+
+    .analyze-btn:disabled {
+      background: var(--border-strong);
+      color: var(--text-tertiary);
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    /* ── PROGRESS ── */
+    #progress {
+      display: none;
+      margin-top: 36px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    #progress.visible { display: block; }
+
+    .prog-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-secondary);
+      letter-spacing: 0.02em;
+      margin-bottom: 10px;
+    }
+
+    .prog-bar {
+      height: 2px;
+      background: var(--border);
+      border-radius: 1px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prog-fill {
+      position: absolute;
+      left: 0; top: 0; height: 100%;
+      background: var(--text);
+      transition: width 0.4s cubic-bezier(0.25, 0, 0, 1);
+      width: 0;
+    }
+
+    .prog-steps {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .step {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-tertiary);
+      opacity: 0.5;
+      transition: all 0.3s ease;
+    }
+    .step.active { opacity: 1; color: var(--text); border-color: var(--text-secondary); background: var(--surface-warm); }
+    .step.done   { opacity: 0.7; color: var(--green); border-color: rgba(45,106,79,0.35); }
+
+    /* ── RESULTS ── */
+    #results {
+      display: none;
+      margin-top: 48px;
+    }
+    #results.visible { display: block; }
+
+    .results-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.15em;
+      color: var(--text-tertiary);
+      text-transform: uppercase;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    /* Verdict box */
+    .verdict {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 28px 32px;
+      border: 1px solid;
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .verdict.v-match  { border-color: rgba(45,106,79,0.35); background: rgba(45,106,79,0.03); }
+    .verdict.v-likely { border-color: rgba(156,102,68,0.35); background: rgba(156,102,68,0.03); }
+    .verdict.v-weak   { border-color: rgba(0,86,179,0.2); background: rgba(0,86,179,0.02); }
+    .verdict.v-none   { border-color: var(--border); background: var(--surface); }
+
+    .v-score {
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 52px;
+      line-height: 1;
+      min-width: 120px;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+
+    .verdict.v-match  .v-score { color: var(--green); }
+    .verdict.v-likely .v-score { color: var(--amber); }
+    .verdict.v-weak   .v-score { color: var(--blue); }
+    .verdict.v-none   .v-score { color: var(--text-tertiary); }
+
+    .v-text h3 {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .v-text p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 440px;
+      line-height: 1.6;
+    }
+
+    /* Stats */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .stat-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 6px;
+    }
+
+    .stat-val {
+      font-family: var(--font-sans);
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.02em;
+    }
+
+    /* Alignment chart */
+    .chart-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-bottom: 10px;
+    }
+
+    .chart-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    canvas#align-canvas {
+      display: block;
+      width: 100%;
+      height: 100px;
+      background: var(--surface-warm);
+      border-radius: var(--radius);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin-top: 80px;
+      padding: 24px 32px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .footer-inner {
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .foot-note {
+      font-size: 12px;
+      color: var(--text-tertiary);
+    }
+
+    .foot-note a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      transition: all 0.15s;
+    }
+    .foot-note a:hover {
+      color: var(--text);
+      border-color: var(--text-secondary);
+    }
+
+    /* Responsive */
+    @media (max-width: 720px) {
+      main { padding: 28px 20px 60px; }
+      .header-inner { padding: 16px 20px; }
+      .sources { grid-template-columns: 1fr; }
+      .vs-col { flex-direction: row; padding: 12px 0; gap: 12px; }
+      .vs-line { width: 40px; max-height: none; height: 1px; flex: none; }
+      .verdict { flex-direction: column; gap: 16px; align-items: flex-start; }
+      .v-score { font-size: 42px; min-width: auto; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .intro { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .footer-inner { flex-direction: column; text-align: center; gap: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1.5" y="1.5" width="29" height="29" rx="4" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M7 16C7 16 9.5 10 12 16C14.5 22 17 16 17 16C17 16 19.5 10 22 16C24.5 22 27 16 27 16" 
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 19C7 19 9.5 13 12 19C14.5 25 17 19 17 19C17 19 19.5 13 22 19C24.5 25 27 19 27 19" 
+              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
+      </svg>
+      <div class="logo-text">
+        <h1>AudioTwin</h1>
+        <span>Audio Correspondence</span>
+      </div>
+    </div>
+    <div class="header-meta">v1.0</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="intro">
+    <div class="intro-text">
+      <h2>How it works</h2>
+      <p>
+        Load two audio recordings. AudioTwin fingerprints both tracks using spectral delta encoding, 
+        finds the best temporal alignment through offset voting, and reports a confidence score. 
+        All processing happens locally in your browser.
+      </p>
+    </div>
+    <div class="privacy-note">Private &amp; Local</div>
+  </div>
+
+  <!-- ── SOURCES ── -->
+  <div class="sources">
+
+    <!-- SOURCE A -->
+    <div class="source-panel" id="panel-a">
+      <div class="panel-header">
+        <span class="panel-label">Source A</span>
+        <span class="panel-status" id="status-a">No file</span>
+      </div>
+
+      <div class="drop-zone" id="drop-a">
+        <input type="file" accept="audio/*" id="file-a">
+        <svg class="drop-icon" width="28" height="28" viewBox="0 0 28 28" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4v12M8 10l6 6 6-6"/>
+          <path d="M4 18v3a2 2 0 002 2h16a2 2 0 002-2v-3"/>
+        </svg>
+        <div class="drop-text">
+          <strong>Drop audio file here</strong>
+          MP3 · WAV · OGG · M4A · FLAC
+        </div>
+      </div>
+
+      <div class="url-section">
+        <button class="url-toggle" onclick="toggleUrl('a')">+ Use URL instead</button>
+        <div class="url-row" id="url-row-a">
+          <input class="url-input" id="url-a" type="text" placeholder="https://…/audio.mp3">
+          <button class="url-load" onclick="loadFromUrl('a')">Load</button>
+        </div>
+        <div class="cors-note" id="cors-a">
+          Direct audio URLs (.mp3/.wav) work best. YouTube, TikTok, and SoundCloud 
+          require downloading the file first due to browser security restrictions.
+        </div>
+      </div>
+
+      <div class="file-info" id="info-a">
+        <div class="fi-name" id="fi-name-a"></div>
+        <div class="fi-meta" id="fi-meta-a"></div>
+      </div>
+
+      <div class="waveform-wrap">
+        <canvas class="waveform" id="wave-a"></canvas>
+        <span class="wave-label">Waveform</span>
+      </div>
+    </div>
+
+    <!-- VS -->
+    <div class="vs-col">
+      <div class="vs-line"></div>
+      <span class="vs-text">vs</span>
+      <div class="vs-line"></div>
+    </div>
+
+    <!-- SOURCE B -->
+    <div class="source-panel" id="panel-b">
+      <div class="panel-header">
+        <span class="panel-label">Source B</span>
+        <span class="panel-status" id="status-b">No file</span>
+      </div>
+
+      <div class="drop-zone" id="drop-b">
+        <input type="file" accept="audio/*" id="file-b">
+        <svg class="drop-icon" width="28" height="28" viewBox="0 0 28 28" fill="none"
+             stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 4v12M8 10l6 6 6-6"/>
+          <path d="M4 18v3a2 2 0 002 2h16a2 2 0 002-2v-3"/>
+        </svg>
+        <div class="drop-text">
+          <strong>Drop audio file here</strong>
+          MP3 · WAV · OGG · M4A · FLAC
+        </div>
+      </div>
+
+      <div class="url-section">
+        <button class="url-toggle" onclick="toggleUrl('b')">+ Use URL instead</button>
+        <div class="url-row" id="url-row-b">
+          <input class="url-input" id="url-b" type="text" placeholder="https://…/audio.mp3">
+          <button class="url-load" onclick="loadFromUrl('b')">Load</button>
+        </div>
+        <div class="cors-note" id="cors-b">
+          Direct audio URLs (.mp3/.wav) work best. YouTube, TikTok, and SoundCloud 
+          require downloading the file first due to browser security restrictions.
+        </div>
+      </div>
+
+      <div class="file-info" id="info-b">
+        <div class="fi-name" id="fi-name-b"></div>
+        <div class="fi-meta" id="fi-meta-b"></div>
+      </div>
+
+      <div class="waveform-wrap">
+        <canvas class="waveform" id="wave-b"></canvas>
+        <span class="wave-label">Waveform</span>
+      </div>
+    </div>
+
+  </div><!-- /sources -->
+
+  <!-- ── CONTROLS ── -->
+  <div class="controls">
+    <button class="analyze-btn" id="analyze-btn" onclick="runAnalysis()" disabled>
+      Analyze Tracks
+    </button>
+  </div>
+
+  <!-- ── PROGRESS ── -->
+  <div id="progress">
+    <div class="prog-label" id="prog-label">Initializing…</div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+    <div class="prog-steps">
+      <div class="step" id="s-decode">Decode</div>
+      <div class="step" id="s-resample">Resample</div>
+      <div class="step" id="s-fft">FFT Analysis</div>
+      <div class="step" id="s-fp">Fingerprint</div>
+      <div class="step" id="s-match">Offset Match</div>
+      <div class="step" id="s-score">Score</div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ── -->
+  <div id="results">
+    <div class="results-title">Analysis Results</div>
+
+    <div class="verdict" id="verdict">
+      <div class="v-score" id="v-score">—</div>
+      <div class="v-text">
+        <h3 id="v-title">—</h3>
+        <p id="v-desc">—</p>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Match Score</div>
+        <div class="stat-val" id="s-confidence">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Best Alignment</div>
+        <div class="stat-val" id="s-offset">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Frames Matched</div>
+        <div class="stat-val" id="s-frames">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">SNR</div>
+        <div class="stat-val" id="s-snr">—</div>
+      </div>
+    </div>
+
+    <div class="chart-label">Offset Vote Distribution — peak indicates best temporal alignment</div>
+    <div class="chart-wrap">
+      <canvas id="align-canvas"></canvas>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="foot-note">
+      All processing is done <strong>locally in your browser</strong>.
+      No audio data is transmitted.
+    </div>
+    <div class="foot-note">
+      <a href="https://github.com/huarox/audiotwin" target="_blank">View on GitHub</a>
+      &nbsp;·&nbsp; GPL-3.0 license
+    </div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════════════ -->
+<script>
+
+'use strict';
+
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const TARGET_RATE  = 8000;
+const FRAME_SIZE   = 512;
+const HOP_SIZE     = 128;
+const NUM_BANDS    = 8;
+const MAX_SECONDS  = 60;
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const src = { a: null, b: null };
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+// ─────────────────────────────────────────────
+// FFT (Cooley-Tukey, in-place, radix-2)
+// ─────────────────────────────────────────────
+function fft(real, imag) {
+  const n = real.length;
+
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) {
+      let t = real[i]; real[i] = real[j]; real[j] = t;
+      t = imag[i]; imag[i] = imag[j]; imag[j] = t;
+    }
+  }
+
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang  = (2 * Math.PI) / len;
+    const wCos = Math.cos(ang);
+    const wSin = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let wr = 1, wi = 0;
+      const half = len >> 1;
+      for (let j = 0; j < half; j++) {
+        const ur = real[i + j],     ui = imag[i + j];
+        const h  = i + j + half;
+        const vr = real[h] * wr - imag[h] * wi;
+        const vi = real[h] * wi + imag[h] * wr;
+        real[i + j] = ur + vr;  imag[i + j] = ui + vi;
+        real[h]     = ur - vr;  imag[h]     = ui - vi;
+        const nwr = wr * wCos - wi * wSin;
+        wi = wr * wSin + wi * wCos;
+        wr = nwr;
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+// HANN WINDOW
+// ─────────────────────────────────────────────
+const HANN = new Float32Array(FRAME_SIZE);
+for (let i = 0; i < FRAME_SIZE; i++) {
+  HANN[i] = 0.5 * (1 - Math.cos((2 * Math.PI * i) / (FRAME_SIZE - 1)));
+}
+
+// ─────────────────────────────────────────────
+// BAND BOUNDARIES (log-spaced, 150 Hz – 4 kHz)
+// ─────────────────────────────────────────────
+const BAND_BINS = new Uint16Array(NUM_BANDS + 1);
+for (let b = 0; b <= NUM_BANDS; b++) {
+  const freq = 150 * Math.pow(4000 / 150, b / NUM_BANDS);
+  BAND_BINS[b] = Math.min(
+    Math.round(freq * FRAME_SIZE / TARGET_RATE),
+    FRAME_SIZE / 2 - 1
+  );
+}
+
+// ─────────────────────────────────────────────
+// RESAMPLE + MONO via OfflineAudioContext
+// ─────────────────────────────────────────────
+async function toMono8k(buffer) {
+  const targetLen = Math.round(
+    Math.min(buffer.duration, MAX_SECONDS) * TARGET_RATE
+  );
+  const off = new OfflineAudioContext(1, targetLen, TARGET_RATE);
+  const s = off.createBufferSource();
+  s.buffer = buffer;
+  s.connect(off.destination);
+  s.start(0);
+  const rendered = await off.startRendering();
+  return rendered.getChannelData(0);
+}
+
+// ─────────────────────────────────────────────
+// FINGERPRINT
+// ─────────────────────────────────────────────
+function fingerprint(samples) {
+  const maxN = Math.min(samples.length, MAX_SECONDS * TARGET_RATE);
+  const energyFrames = [];
+  const real = new Float32Array(FRAME_SIZE);
+  const imag = new Float32Array(FRAME_SIZE);
+
+  for (let start = 0; start + FRAME_SIZE <= maxN; start += HOP_SIZE) {
+    for (let i = 0; i < FRAME_SIZE; i++) {
+      real[i] = samples[start + i] * HANN[i];
+      imag[i] = 0;
+    }
+
+    fft(real, imag);
+
+    const bands = new Float32Array(NUM_BANDS);
+    for (let b = 0; b < NUM_BANDS; b++) {
+      for (let k = BAND_BINS[b]; k < BAND_BINS[b + 1]; k++) {
+        bands[b] += real[k] * real[k] + imag[k] * imag[k];
+      }
+    }
+    energyFrames.push(bands);
+  }
+
+  const hashes = new Uint8Array(Math.max(0, energyFrames.length - 1));
+  for (let i = 1; i < energyFrames.length; i++) {
+    let h = 0;
+    for (let b = 0; b < NUM_BANDS; b++) {
+      if (energyFrames[i][b] > energyFrames[i - 1][b]) h |= (1 << b);
+    }
+    hashes[i - 1] = h;
+  }
+
+  return { hashes, energyFrames };
+}
+
+// ─────────────────────────────────────────────
+// MATCH via offset voting (Shazam-style)
+// ─────────────────────────────────────────────
+function match(fpA, fpB) {
+  const hA = fpA.hashes;
+  const hB = fpB.hashes;
+  const lenA = hA.length;
+  const lenB = hB.length;
+
+  const bMap = new Map();
+  for (let j = 0; j < lenB; j++) {
+    const h = hB[j];
+    if (!bMap.has(h)) bMap.set(h, []);
+    bMap.get(h).push(j);
+  }
+
+  const BASE = lenB;
+  const votes = new Int32Array(lenA + lenB);
+
+  for (let i = 0; i < lenA; i++) {
+    const matches = bMap.get(hA[i]);
+    if (!matches) continue;
+    for (const j of matches) {
+      const off = i - j + BASE;
+      if (off >= 0 && off < votes.length) votes[off]++;
+    }
+  }
+
+  let bestOff = 0, bestVotes = 0;
+  for (let k = 0; k < votes.length; k++) {
+    if (votes[k] > bestVotes) { bestVotes = votes[k]; bestOff = k; }
+  }
+
+  const realOffset = bestOff - BASE;
+  const shortLen   = Math.min(lenA, lenB);
+
+  let total = 0;
+  for (let k = 0; k < votes.length; k++) total += votes[k];
+  const mean = total / votes.length;
+  const snr  = bestVotes / (mean + 1e-6);
+
+  const hashRatio = bestVotes / shortLen;
+
+  const eA = fpA.energyFrames;
+  const eB = fpB.energyFrames;
+  let dot = 0, nA = 0, nB = 0;
+  for (let i = 0; i < eA.length; i++) {
+    const j = i + realOffset;
+    if (j < 0 || j >= eB.length) continue;
+    for (let b = 0; b < NUM_BANDS; b++) {
+      dot += eA[i][b] * eB[j][b];
+      nA  += eA[i][b] * eA[i][b];
+      nB  += eB[j][b] * eB[j][b];
+    }
+  }
+  const cosine = dot / (Math.sqrt(nA * nB) + 1e-10);
+
+  const snrNorm    = Math.min(snr / 40, 1);
+  const ratioNorm  = Math.min(hashRatio / 0.7, 1);
+  const cosineNorm = Math.min(Math.max(cosine, 0), 1);
+  const score = snrNorm * 0.45 + ratioNorm * 0.35 + cosineNorm * 0.20;
+
+  return {
+    score   : Math.min(Math.max(score, 0), 1),
+    hashRatio,
+    cosine,
+    snr,
+    bestVotes,
+    shortLen,
+    realOffset,
+    timeOffset : realOffset * HOP_SIZE / TARGET_RATE,
+    votes,
+    BASE,
+  };
+}
+
+// ─────────────────────────────────────────────
+// WAVEFORM RENDERER
+// ─────────────────────────────────────────────
+function drawWaveform(canvasId, samples) {
+  const cv  = document.getElementById(canvasId);
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = cv.offsetWidth  * dpr;
+  cv.height = cv.offsetHeight * dpr;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#faf9f6';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.strokeStyle = '#e0dfd9';
+  ctx.lineWidth = 1 * dpr;
+  ctx.beginPath();
+  ctx.moveTo(0, H / 2);
+  ctx.lineTo(W, H / 2);
+  ctx.stroke();
+
+  const step = Math.max(1, Math.floor(samples.length / W));
+  ctx.strokeStyle = '#1d1d1f';
+  ctx.lineWidth   = 1 * dpr;
+  ctx.beginPath();
+
+  for (let x = 0; x < W; x++) {
+    let mn = 1, mx = -1;
+    const base = x * step;
+    for (let k = 0; k < step; k++) {
+      const v = samples[base + k] || 0;
+      if (v < mn) mn = v;
+      if (v > mx) mx = v;
+    }
+    const mid = H / 2;
+    ctx.moveTo(x, mid + mn * mid * 0.88);
+    ctx.lineTo(x, mid + mx * mid * 0.88);
+  }
+  ctx.stroke();
+}
+
+// ─────────────────────────────────────────────
+// ALIGNMENT CHART
+// ─────────────────────────────────────────────
+function drawAlignment(result) {
+  const cv  = document.getElementById('align-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  cv.width  = cv.offsetWidth  * dpr;
+  cv.height = cv.offsetHeight * dpr;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+
+  ctx.fillStyle = '#faf9f6';
+  ctx.fillRect(0, 0, W, H);
+
+  const { votes, BASE, realOffset } = result;
+  const peak = Math.max(...votes) || 1;
+  const barW = W / votes.length;
+
+  for (let k = 0; k < votes.length; k++) {
+    if (!votes[k]) continue;
+    const h = (votes[k] / peak) * (H - 2);
+    const x = k * barW;
+    const isBest = Math.abs(k - BASE - realOffset) <= 1;
+
+    if (isBest) {
+      ctx.fillStyle = '#1d1d1f';
+    } else {
+      ctx.fillStyle = `rgba(110,110,115,${0.12 + 0.88 * votes[k] / peak})`;
+    }
+    ctx.fillRect(x, H - h - 1, Math.max(barW, 1), h);
+  }
+
+  const labelX = Math.min(Math.max((BASE + realOffset) * barW, 2), W - 100);
+  const offsetSec = (realOffset * HOP_SIZE / TARGET_RATE).toFixed(2);
+  ctx.fillStyle   = '#1d1d1f';
+  ctx.font        = `${10 * dpr}px 'IBM Plex Mono', monospace`;
+  ctx.fillText(`▲ ${offsetSec > 0 ? '+' : ''}${offsetSec}s`, labelX, H - 6 * dpr);
+}
+
+// ─────────────────────────────────────────────
+// UI HELPERS
+// ─────────────────────────────────────────────
+function $id(id) { return document.getElementById(id); }
+
+function setProgress(pct, label) {
+  $id('prog-fill').style.width  = pct + '%';
+  $id('prog-label').textContent = label;
+}
+
+function setStep(id, state) {
+  const el = $id('s-' + id);
+  el.className = 'step' + (state ? ' ' + state : '');
+}
+
+function fmtDuration(sec) {
+  const m = Math.floor(sec / 60), s = Math.floor(sec % 60);
+  return `${m}m ${String(s).padStart(2,'0')}s`;
+}
+
+function fmtOffset(sec) {
+  if (Math.abs(sec) < 0.1) return '≈ 0.0s';
+  return (sec > 0 ? '+' : '') + sec.toFixed(2) + 's';
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function checkReady() {
+  $id('analyze-btn').disabled = !(src.a && src.b);
+}
+
+// ─────────────────────────────────────────────
+// LOAD AUDIO
+// ─────────────────────────────────────────────
+async function decodeAudio(ab) {
+  return new Promise((res, rej) => audioCtx.decodeAudioData(ab, res, rej));
+}
+
+async function processAudio(track, arrayBuffer, name) {
+  try {
+    const buffer = await decodeAudio(arrayBuffer);
+    src[track] = { buffer, name, duration: buffer.duration };
+
+    let mono;
+    if (buffer.numberOfChannels === 1) {
+      mono = buffer.getChannelData(0);
+    } else {
+      const L = buffer.getChannelData(0);
+      const R = buffer.getChannelData(1);
+      mono = new Float32Array(L.length);
+      for (let i = 0; i < L.length; i++) mono[i] = (L[i] + R[i]) * 0.5;
+    }
+
+    drawWaveform('wave-' + track, mono);
+
+    $id('fi-name-' + track).textContent = name;
+    $id('fi-meta-' + track).textContent =
+      `${fmtDuration(buffer.duration)} · ${buffer.sampleRate} Hz · ${buffer.numberOfChannels}ch`;
+    $id('info-' + track).classList.add('visible');
+    $id('status-' + track).textContent = 'Loaded';
+    $id('panel-' + track).classList.add('has-file');
+
+    checkReady();
+  } catch (err) {
+    alert(`Failed to decode audio (${track.toUpperCase()}): ${err.message}`);
+  }
+}
+
+// ─────────────────────────────────────────────
+// DROP ZONES
+// ─────────────────────────────────────────────
+function setupDrop(track) {
+  const zone = $id('drop-' + track);
+  const inp  = $id('file-' + track);
+
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', async e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) processAudio(track, await file.arrayBuffer(), file.name);
+  });
+
+  inp.addEventListener('change', async e => {
+    const file = e.target.files[0];
+    if (file) processAudio(track, await file.arrayBuffer(), file.name);
+  });
+}
+
+setupDrop('a');
+setupDrop('b');
+
+// ─────────────────────────────────────────────
+// URL LOADING
+// ─────────────────────────────────────────────
+function toggleUrl(track) {
+  $id('url-row-' + track).classList.toggle('open');
+}
+
+async function loadFromUrl(track) {
+  const url = $id('url-' + track).value.trim();
+  if (!url) return;
+
+  $id('cors-' + track).classList.remove('visible');
+
+  try {
+    let response;
+    try {
+      response = await fetch(url);
+    } catch {
+      $id('cors-' + track).classList.add('visible');
+      response = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
+    }
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const ab   = await response.arrayBuffer();
+    const name = url.split('/').pop().split('?')[0] || 'remote-audio';
+    await processAudio(track, ab, name);
+  } catch (err) {
+    $id('cors-' + track).classList.add('visible');
+    alert(`Could not load URL:
+${err.message}
+
+Tip: Download the file and upload it directly.`);
+  }
+}
+
+// ─────────────────────────────────────────────
+// MAIN ANALYSIS
+// ─────────────────────────────────────────────
+async function runAnalysis() {
+  if (!src.a || !src.b) return;
+
+  const btn = $id('analyze-btn');
+  btn.disabled     = true;
+  btn.textContent  = 'Analyzing…';
+
+  $id('progress').classList.add('visible');
+  $id('results').classList.remove('visible');
+
+  ['decode','resample','fft','fp','match','score'].forEach(s => setStep(s, ''));
+
+  try {
+    setStep('decode', 'active');
+    setProgress(8, 'Verifying audio buffers…');
+    await sleep(80);
+    setStep('decode', 'done');
+
+    setStep('resample', 'active');
+    setProgress(22, `Resampling to ${TARGET_RATE} Hz mono…`);
+
+    const [sampA, sampB] = await Promise.all([
+      toMono8k(src.a.buffer),
+      toMono8k(src.b.buffer),
+    ]);
+
+    setStep('resample', 'done');
+
+    setStep('fft', 'active');
+    setProgress(42, 'Running spectral analysis…');
+    await sleep(60);
+
+    setStep('fp', 'active');
+    setProgress(58, 'Generating delta fingerprints…');
+
+    const fpA = fingerprint(sampA);
+    const fpB = fingerprint(sampB);
+
+    setStep('fft', 'done');
+    setStep('fp',  'done');
+
+    setStep('match', 'active');
+    setProgress(76, `Voting across ${fpA.hashes.length} × ${fpB.hashes.length} frames…`);
+    await sleep(40);
+
+    const result = match(fpA, fpB);
+
+    setStep('match', 'done');
+
+    setStep('score', 'active');
+    setProgress(96, 'Computing confidence…');
+    await sleep(80);
+    setStep('score', 'done');
+    setProgress(100, 'Analysis complete.');
+
+    renderResults(result);
+
+  } catch (err) {
+    console.error(err);
+    alert('Analysis error: ' + err.message);
+  }
+
+  btn.disabled    = false;
+  btn.textContent = 'Analyze Tracks';
+}
+
+// ─────────────────────────────────────────────
+// RENDER RESULTS
+// ─────────────────────────────────────────────
+function renderResults(result) {
+  $id('results').classList.add('visible');
+
+  const pct = Math.round(result.score * 100);
+
+  let cls, title, desc;
+  if (pct >= 65) {
+    cls = 'v-match';
+    title = 'High Confidence Match';
+    desc  = 'These tracks are almost certainly the same recording. Differences, if any, are limited to bitrate, encoding, loudness normalisation, or minor editing.';
+  } else if (pct >= 40) {
+    cls = 'v-likely';
+    title = 'Probable Match';
+    desc  = 'Significant similarity detected. The tracks likely share the same source. Divergence may come from pitch shifting, time-stretching, re-encoding, or moderate processing.';
+  } else if (pct >= 18) {
+    cls = 'v-weak';
+    title = 'Weak Correlation';
+    desc  = 'Some spectral overlap exists, but the result is inconclusive. The tracks may share samples, a similar groove, or be different covers of the same composition.';
+  } else {
+    cls = 'v-none';
+    title = 'No Significant Match';
+    desc  = 'No strong correlation found. These appear to be different recordings. If you expected a match, try trimming both files to the shared segment before re-analysing.';
+  }
+
+  const verdict = $id('verdict');
+  verdict.className = 'verdict ' + cls;
+  $id('v-score').textContent = pct + '%';
+  $id('v-title').textContent = title;
+  $id('v-desc').textContent  = desc;
+
+  $id('s-confidence').textContent = (result.score * 100).toFixed(1) + '%';
+  $id('s-offset').textContent     = fmtOffset(result.timeOffset);
+  $id('s-frames').textContent     = `${result.bestVotes} / ${result.shortLen}`;
+  $id('s-snr').textContent        = result.snr.toFixed(1) + '×';
+
+  drawAlignment(result);
+
+  $id('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+</script>
+
+</body>
+</html>
