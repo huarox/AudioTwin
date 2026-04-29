@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AudioTwin — Audio Correspondence</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='4' fill='none' stroke='%231d1d1f' stroke-width='1.5'/%3E%3Cpath d='M7 16C7 16 9.5 10 12 16C14.5 22 17 16 17 16C17 16 19.5 10 22 16C24.5 22 27 16 27 16' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7 19C7 19 9.5 13 12 19C14.5 25 17 19 17 19C17 19 19.5 13 22 19C24.5 25 27 19 27 19' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.35'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1.5' y='1.5' width='29' height='29' rx='4' fill='none' stroke='%231d1d1f' stroke-width='1.5'/%3E%3Cpath d='M7 16C7 16 9.5 10 12 16C14.5 22 17 16 17 16C17 16 19.5 10 22 16C24.5 22 27 16 27 16' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7 19C7 19 9.5 13 12 19C14.5 25 17 19 17 19C17 19 19.5 13 22 19C24.5 25 27 19 27 19' fill='none' stroke='%231d1d1f' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' opacity='0.35'/%3E%3C/svg%3E">
   <style>
     :root {
       --bg:           #f2f1ec;
@@ -44,6 +44,8 @@
       font-size: 14px;
       line-height: 1.5;
       letter-spacing: -0.01em;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── HEADER ── */
@@ -53,6 +55,7 @@
       position: sticky;
       top: 0;
       z-index: 100;
+      flex-shrink: 0;
     }
 
     .header-inner {
@@ -108,6 +111,8 @@
       max-width: 980px;
       margin: 0 auto;
       padding: 48px 32px 96px;
+      width: 100%;
+      flex: 1 0 auto;
     }
 
     /* ── INTRO ── */
@@ -306,6 +311,7 @@
       line-height: 1.5;
     }
     .cors-note.visible { display: block; }
+    .cors-note.error { color: var(--red); }
 
     /* File info */
     .file-info {
@@ -360,7 +366,7 @@
       text-transform: uppercase;
     }
 
-    /* ── VS column ── */
+    /* ── VS COLUMN & SCAN ANIMATION ── */
     .vs-col {
       display: flex;
       flex-direction: column;
@@ -368,6 +374,7 @@
       justify-content: center;
       padding-top: 64px;
       gap: 6px;
+      position: relative;
     }
 
     .vs-line {
@@ -375,6 +382,7 @@
       flex: 1;
       max-height: 28px;
       background: var(--border-strong);
+      transition: opacity 0.3s ease;
     }
 
     .vs-text {
@@ -384,6 +392,87 @@
       letter-spacing: 0.2em;
       color: var(--text-tertiary);
       text-transform: uppercase;
+      transition: opacity 0.3s ease;
+    }
+
+    .vs-col.analyzing .vs-line,
+    .vs-col.analyzing .vs-text {
+      opacity: 0;
+    }
+
+    .scan-anim {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 80px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .vs-col.analyzing .scan-anim {
+      display: flex;
+    }
+
+    .scan-line {
+      width: 1px;
+      height: 40px;
+      background: var(--border-strong);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .scan-line::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 1px;
+      height: 8px;
+      background: var(--text);
+      animation: scanMove 1.4s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+    }
+
+    @keyframes scanMove {
+      0%   { top: 0; opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      100% { top: 32px; opacity: 0; }
+    }
+
+    .scan-dots {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .scan-dot {
+      width: 3px;
+      height: 3px;
+      border-radius: 50%;
+      background: var(--text-tertiary);
+      animation: scanPulse 1.4s ease-in-out infinite;
+    }
+
+    .scan-dot:nth-child(1) { animation-delay: 0s; }
+    .scan-dot:nth-child(2) { animation-delay: 0.2s; }
+    .scan-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes scanPulse {
+      0%, 100% { opacity: 0.25; transform: scale(1); }
+      50%      { opacity: 1; transform: scale(1.3); }
+    }
+
+    .scan-label {
+      font-family: var(--font-mono);
+      font-size: 8px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-tertiary);
+      margin-top: 2px;
     }
 
     /* ── CONTROLS ── */
@@ -614,10 +703,11 @@
 
     /* ── FOOTER ── */
     footer {
-      margin-top: 80px;
       padding: 24px 32px;
       border-top: 1px solid var(--border);
       background: var(--surface);
+      flex-shrink: 0;
+      margin-top: auto;
     }
 
     .footer-inner {
@@ -657,6 +747,9 @@
       .stats { grid-template-columns: 1fr 1fr; }
       .intro { flex-direction: column; align-items: flex-start; gap: 16px; }
       .footer-inner { flex-direction: column; text-align: center; gap: 8px; }
+      .scan-anim { display: none !important; }
+      .vs-col.analyzing .vs-line,
+      .vs-col.analyzing .vs-text { opacity: 1; }
     }
   </style>
 </head>
@@ -722,12 +815,13 @@
       <div class="url-section">
         <button class="url-toggle" onclick="toggleUrl('a')">+ Use URL instead</button>
         <div class="url-row" id="url-row-a">
-          <input class="url-input" id="url-a" type="text" placeholder="https://…/audio.mp3">
+          <input class="url-input" id="url-a" type="text" placeholder="https://cdn.example.com/audio.mp3">
           <button class="url-load" onclick="loadFromUrl('a')">Load</button>
         </div>
         <div class="cors-note" id="cors-a">
-          Direct audio URLs (.mp3/.wav) work best. YouTube, TikTok, and SoundCloud 
-          require downloading the file first due to browser security restrictions.
+          Only direct audio file links work (ending in .mp3, .wav, etc.) and the server must allow 
+          cross-origin requests. YouTube, TikTok, SoundCloud, and Spotify links will not work — 
+          download the file first, then upload it here.
         </div>
       </div>
 
@@ -743,10 +837,20 @@
     </div>
 
     <!-- VS -->
-    <div class="vs-col">
+    <div class="vs-col" id="vs-col">
       <div class="vs-line"></div>
       <span class="vs-text">vs</span>
       <div class="vs-line"></div>
+
+      <div class="scan-anim">
+        <div class="scan-line"></div>
+        <div class="scan-dots">
+          <div class="scan-dot"></div>
+          <div class="scan-dot"></div>
+          <div class="scan-dot"></div>
+        </div>
+        <div class="scan-label">Scanning</div>
+      </div>
     </div>
 
     <!-- SOURCE B -->
@@ -772,12 +876,13 @@
       <div class="url-section">
         <button class="url-toggle" onclick="toggleUrl('b')">+ Use URL instead</button>
         <div class="url-row" id="url-row-b">
-          <input class="url-input" id="url-b" type="text" placeholder="https://…/audio.mp3">
+          <input class="url-input" id="url-b" type="text" placeholder="https://cdn.example.com/audio.mp3">
           <button class="url-load" onclick="loadFromUrl('b')">Load</button>
         </div>
         <div class="cors-note" id="cors-b">
-          Direct audio URLs (.mp3/.wav) work best. YouTube, TikTok, and SoundCloud 
-          require downloading the file first due to browser security restrictions.
+          Only direct audio file links work (ending in .mp3, .wav, etc.) and the server must allow 
+          cross-origin requests. YouTube, TikTok, SoundCloud, and Spotify links will not work — 
+          download the file first, then upload it here.
         </div>
       </div>
 
@@ -880,6 +985,7 @@ const FRAME_SIZE   = 512;
 const HOP_SIZE     = 128;
 const NUM_BANDS    = 8;
 const MAX_SECONDS  = 60;
+const DELTA_RATIO  = 1.05;
 
 // ─────────────────────────────────────────────
 // STATE
@@ -946,7 +1052,37 @@ for (let b = 0; b <= NUM_BANDS; b++) {
 }
 
 // ─────────────────────────────────────────────
-// RESAMPLE + MONO via OfflineAudioContext
+// RMS NORMALISE
+// ─────────────────────────────────────────────
+function rmsNormalize(samples, targetRMS = 0.15) {
+  let sum = 0;
+  for (let i = 0; i < samples.length; i++) sum += samples[i] * samples[i];
+  const rms = Math.sqrt(sum / samples.length);
+  if (rms < 1e-8) return samples;
+  const gain = targetRMS / rms;
+  for (let i = 0; i < samples.length; i++) samples[i] *= gain;
+  return samples;
+}
+
+// ─────────────────────────────────────────────
+// SOFT COMPRESSOR
+// ─────────────────────────────────────────────
+function softCompress(samples, threshold = 0.25, ratio = 4) {
+  const makeup = Math.pow(threshold, 1 - 1 / ratio);
+  for (let i = 0; i < samples.length; i++) {
+    const abs = Math.abs(samples[i]);
+    if (abs > threshold) {
+      const excess = abs - threshold;
+      const compressed = threshold + excess / ratio;
+      samples[i] = (samples[i] > 0 ? 1 : -1) * compressed;
+    }
+  }
+  for (let i = 0; i < samples.length; i++) samples[i] *= makeup;
+  return samples;
+}
+
+// ─────────────────────────────────────────────
+// RESAMPLE + MONO
 // ─────────────────────────────────────────────
 async function toMono8k(buffer) {
   const targetLen = Math.round(
@@ -983,24 +1119,36 @@ function fingerprint(samples) {
       for (let k = BAND_BINS[b]; k < BAND_BINS[b + 1]; k++) {
         bands[b] += real[k] * real[k] + imag[k] * imag[k];
       }
+      bands[b] = Math.log1p(bands[b]);
     }
+
+    let total = 0;
+    for (let b = 0; b < NUM_BANDS; b++) total += bands[b];
+    if (total > 0) {
+      for (let b = 0; b < NUM_BANDS; b++) bands[b] /= total;
+    }
+
     energyFrames.push(bands);
   }
 
-  const hashes = new Uint8Array(Math.max(0, energyFrames.length - 1));
-  for (let i = 1; i < energyFrames.length; i++) {
+  const hashes = new Uint8Array(Math.max(0, energyFrames.length - 2));
+  for (let i = 2; i < energyFrames.length; i++) {
     let h = 0;
     for (let b = 0; b < NUM_BANDS; b++) {
-      if (energyFrames[i][b] > energyFrames[i - 1][b]) h |= (1 << b);
+      const prev = energyFrames[i - 1][b];
+      const prev2 = energyFrames[i - 2][b];
+      const curr = energyFrames[i][b];
+      const rising = (curr > prev * DELTA_RATIO) || (curr > prev2 * DELTA_RATIO);
+      if (rising) h |= (1 << b);
     }
-    hashes[i - 1] = h;
+    hashes[i - 2] = h;
   }
 
   return { hashes, energyFrames };
 }
 
 // ─────────────────────────────────────────────
-// MATCH via offset voting (Shazam-style)
+// MATCH
 // ─────────────────────────────────────────────
 function match(fpA, fpB) {
   const hA = fpA.hashes;
@@ -1076,7 +1224,7 @@ function match(fpA, fpB) {
 }
 
 // ─────────────────────────────────────────────
-// WAVEFORM RENDERER
+// WAVEFORM RENDERER (auto-scaled)
 // ─────────────────────────────────────────────
 function drawWaveform(canvasId, samples) {
   const cv  = document.getElementById(canvasId);
@@ -1096,6 +1244,13 @@ function drawWaveform(canvasId, samples) {
   ctx.lineTo(W, H / 2);
   ctx.stroke();
 
+  let peak = 0;
+  for (let i = 0; i < samples.length; i++) {
+    const a = Math.abs(samples[i]);
+    if (a > peak) peak = a;
+  }
+  const scale = peak > 0.001 ? 0.88 / peak : 1;
+
   const step = Math.max(1, Math.floor(samples.length / W));
   ctx.strokeStyle = '#1d1d1f';
   ctx.lineWidth   = 1 * dpr;
@@ -1105,7 +1260,7 @@ function drawWaveform(canvasId, samples) {
     let mn = 1, mx = -1;
     const base = x * step;
     for (let k = 0; k < step; k++) {
-      const v = samples[base + k] || 0;
+      const v = (samples[base + k] || 0) * scale;
       if (v < mn) mn = v;
       if (v > mx) mx = v;
     }
@@ -1251,151 +1406,7 @@ setupDrop('b');
 // ─────────────────────────────────────────────
 // URL LOADING
 // ─────────────────────────────────────────────
-function toggleUrl(track) {
-  $id('url-row-' + track).classList.toggle('open');
-}
-
-async function loadFromUrl(track) {
-  const url = $id('url-' + track).value.trim();
-  if (!url) return;
-
-  $id('cors-' + track).classList.remove('visible');
-
-  try {
-    let response;
-    try {
-      response = await fetch(url);
-    } catch {
-      $id('cors-' + track).classList.add('visible');
-      response = await fetch('https://corsproxy.io/?' + encodeURIComponent(url));
-    }
-
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const ab   = await response.arrayBuffer();
-    const name = url.split('/').pop().split('?')[0] || 'remote-audio';
-    await processAudio(track, ab, name);
-  } catch (err) {
-    $id('cors-' + track).classList.add('visible');
-    alert(`Could not load URL:
-${err.message}
-
-Tip: Download the file and upload it directly.`);
-  }
-}
-
-// ─────────────────────────────────────────────
-// MAIN ANALYSIS
-// ─────────────────────────────────────────────
-async function runAnalysis() {
-  if (!src.a || !src.b) return;
-
-  const btn = $id('analyze-btn');
-  btn.disabled     = true;
-  btn.textContent  = 'Analyzing…';
-
-  $id('progress').classList.add('visible');
-  $id('results').classList.remove('visible');
-
-  ['decode','resample','fft','fp','match','score'].forEach(s => setStep(s, ''));
-
-  try {
-    setStep('decode', 'active');
-    setProgress(8, 'Verifying audio buffers…');
-    await sleep(80);
-    setStep('decode', 'done');
-
-    setStep('resample', 'active');
-    setProgress(22, `Resampling to ${TARGET_RATE} Hz mono…`);
-
-    const [sampA, sampB] = await Promise.all([
-      toMono8k(src.a.buffer),
-      toMono8k(src.b.buffer),
-    ]);
-
-    setStep('resample', 'done');
-
-    setStep('fft', 'active');
-    setProgress(42, 'Running spectral analysis…');
-    await sleep(60);
-
-    setStep('fp', 'active');
-    setProgress(58, 'Generating delta fingerprints…');
-
-    const fpA = fingerprint(sampA);
-    const fpB = fingerprint(sampB);
-
-    setStep('fft', 'done');
-    setStep('fp',  'done');
-
-    setStep('match', 'active');
-    setProgress(76, `Voting across ${fpA.hashes.length} × ${fpB.hashes.length} frames…`);
-    await sleep(40);
-
-    const result = match(fpA, fpB);
-
-    setStep('match', 'done');
-
-    setStep('score', 'active');
-    setProgress(96, 'Computing confidence…');
-    await sleep(80);
-    setStep('score', 'done');
-    setProgress(100, 'Analysis complete.');
-
-    renderResults(result);
-
-  } catch (err) {
-    console.error(err);
-    alert('Analysis error: ' + err.message);
-  }
-
-  btn.disabled    = false;
-  btn.textContent = 'Analyze Tracks';
-}
-
-// ─────────────────────────────────────────────
-// RENDER RESULTS
-// ─────────────────────────────────────────────
-function renderResults(result) {
-  $id('results').classList.add('visible');
-
-  const pct = Math.round(result.score * 100);
-
-  let cls, title, desc;
-  if (pct >= 65) {
-    cls = 'v-match';
-    title = 'High Confidence Match';
-    desc  = 'These tracks are almost certainly the same recording. Differences, if any, are limited to bitrate, encoding, loudness normalisation, or minor editing.';
-  } else if (pct >= 40) {
-    cls = 'v-likely';
-    title = 'Probable Match';
-    desc  = 'Significant similarity detected. The tracks likely share the same source. Divergence may come from pitch shifting, time-stretching, re-encoding, or moderate processing.';
-  } else if (pct >= 18) {
-    cls = 'v-weak';
-    title = 'Weak Correlation';
-    desc  = 'Some spectral overlap exists, but the result is inconclusive. The tracks may share samples, a similar groove, or be different covers of the same composition.';
-  } else {
-    cls = 'v-none';
-    title = 'No Significant Match';
-    desc  = 'No strong correlation found. These appear to be different recordings. If you expected a match, try trimming both files to the shared segment before re-analysing.';
-  }
-
-  const verdict = $id('verdict');
-  verdict.className = 'verdict ' + cls;
-  $id('v-score').textContent = pct + '%';
-  $id('v-title').textContent = title;
-  $id('v-desc').textContent  = desc;
-
-  $id('s-confidence').textContent = (result.score * 100).toFixed(1) + '%';
-  $id('s-offset').textContent     = fmtOffset(result.timeOffset);
-  $id('s-frames').textContent     = `${result.bestVotes} / ${result.shortLen}`;
-  $id('s-snr').textContent        = result.snr.toFixed(1) + '×';
-
-  drawAlignment(result);
-
-  $id('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-</script>
-
-</body>
-</html>
+const BLOCKED_HOSTS = [
+  'youtube.com', 'youtu.be', 'tiktok.com', 'soundcloud.com',
+  'spotify.com', 'apple.com/music', 'music.apple.com', 'deezer.com',
+  'tidal.com', 'bandcamp.com', 'vimeo.com', 'dailymo
