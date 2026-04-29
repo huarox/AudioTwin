@@ -77,7 +77,7 @@ Then upload the resulting file.
 1. Create a new GitHub repository (for example, `audiotwin`)
 2. Upload `index.html` to the root of the repository
 3. Go to **Settings → Pages → Source** and set it to **Deploy from branch → main / root**
-4. Your app is live at `https://YOUR_USERNAME.github.io/audiotwin`
+4. Your app is live at `https://huarox.github.io/audiotwin`
 
 ### Option B — With a custom domain
 
@@ -87,7 +87,7 @@ Same as Option A, then add a `CNAME` file to the repository root containing your
 audiotwin.yourdomain.com
 ```
 
-Configure a CNAME DNS record pointing to `YOUR_USERNAME.github.io`.
+Configure a CNAME DNS record pointing to `huarox.github.io`.
 
 ---
 
@@ -157,4 +157,4 @@ audiotwin/
 
 ## License
 
-MIT — use it freely.
+GPL-3.0 — see LICENSE for details.
